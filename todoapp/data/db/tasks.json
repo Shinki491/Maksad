@@ -1,8 +1,13 @@
 {
     "tasks": [
         {
-            "title": "hw",
-            "priority": "High",
+            "title": "New",
+            "description": "New task desc",
+            "priority_type": "Low",
+            "difficulty": 5,
+            "days": 16,
+            "deadline": "2024-12-31",
+            "priority": 3.125,
             "completed": false
         }
     ],
