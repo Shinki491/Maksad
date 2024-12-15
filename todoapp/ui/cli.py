@@ -2,17 +2,9 @@ from datetime import datetime
 
 class CLI:
     def __init__(self, task_manager):
-        """
-        Initialize the CLI.
-
-        :param task_manager: An instance of TaskManager to manage tasks.
-        """
         self.task_manager = task_manager
 
     def display_menu(self):
-        """
-        Display the main menu options with added style.
-        """
         print("\n===================================")
         print("     📝  To-Do List Menu  📝")
         print("===================================")
@@ -25,9 +17,6 @@ class CLI:
         print("Please select an option (1-5):")
 
     def add_task(self):
-        """
-        Prompt the user to add a new task.
-        """
         title = input("Task title: ").strip()
         while not title:
             title = input("Task title: ").strip()
@@ -55,9 +44,6 @@ class CLI:
         print(f"Task added with title: '{title}'")
 
     def view_tasks(self):
-        """
-        Display the list of tasks sorted by priority.
-        """
         tasks = self.task_manager.get_tasks()
         if not tasks:
             print("No tasks available.")
@@ -223,9 +209,6 @@ class CLI:
 
 
     def mark_task_completed(self):
-        """
-        Prompt the user to mark a task as completed.
-        """
         tasks = self.task_manager.get_tasks()
         if not tasks:
             print("No tasks available to complete.")
@@ -243,9 +226,6 @@ class CLI:
             print("Invalid selection. Please try again.")
 
     def view_completed_tasks(self):
-        """
-        Display the list of completed tasks.
-        """
         completed_tasks = self.task_manager.get_completed_tasks()
         if not completed_tasks:
             print("No completed tasks.")

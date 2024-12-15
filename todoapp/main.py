@@ -3,15 +3,12 @@ from data.storage import Storage
 from ui.cli import CLI
 
 def main():
-    # Initialize storage and task manager
-    storage = Storage("data/db/tasks.json")  # Change to .db if using SQLite
+    storage = Storage("data/db/tasks.json")  
     task_manager = TaskManager(storage)
-    cli = CLI(task_manager)
+    cli = CLI(task_manager)  
     
-    # Load existing tasks from storage
     task_manager.load_tasks()
 
-    # Main menu loop
     while True:
         cli.display_menu()
         choice = input("Choose an option: ").strip()
@@ -26,7 +23,7 @@ def main():
             cli.view_completed_tasks()
         elif choice == "5":
             print("Exiting... Goodbye!")
-            task_manager.save_tasks()  # Save tasks before exiting
+            task_manager.save_tasks()  
             break
         else:
             print("Invalid choice. Please try again.")
