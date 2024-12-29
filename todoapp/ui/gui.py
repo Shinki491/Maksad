@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from datetime import datetime, timedelta
 
 def run_gui(task_manager):
     app = TaskManagerApp(task_manager)
@@ -30,6 +31,7 @@ class TaskManagerApp(tk.Tk):
         ttk.Button(self.button_frame, text="Add Task", command=self.add_task_popup).pack(side=tk.LEFT, padx=5, pady=5)
         ttk.Button(self.button_frame, text="View Task", command=self.view_task).pack(side=tk.LEFT, padx=5, pady=5)
         ttk.Button(self.button_frame, text="Mark Completed", command=self.mark_completed).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(self.button_frame, text="View Completed", command=self.view_completed).pack(side=tk.LEFT, padx=5, pady=5)
         ttk.Button(self.button_frame, text="Exit", command=self.exit_app).pack(side=tk.RIGHT, padx=5, pady=5)
 
         # Load tasks
@@ -80,10 +82,19 @@ class TaskManagerApp(tk.Tk):
 
             try:
                 difficulty = int(difficulty)
-                self.task_manager.add_task(title, description, priority, difficulty, 0, deadline)
+                user_date = datetime.strptime(deadline, "%Y-%m-%d").date()
+                days_until_deadline = (user_date - datetime.today().date()).days
+
+                if days_until_deadline < 0:
+                    messagebox.showerror("Error", "The deadline cannot be in the past!")
+                    return
+
+                self.task_manager.add_task(title, description, priority, difficulty, days_until_deadline, deadline)
                 messagebox.showinfo("Success", "Task added successfully!")
                 self.refresh_task_list()
                 popup.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "Invalid input. Ensure difficulty is a number and the date is in YYYY-MM-DD format.")
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred: {e}")
 
@@ -116,6 +127,28 @@ class TaskManagerApp(tk.Tk):
         self.task_manager.mark_task_completed(selected_idx[0])
         self.refresh_task_list()
         messagebox.showinfo("Success", "Task marked as completed.")
+
+    def view_completed(self):
+        """View the list of completed tasks."""
+        completed_tasks = self.task_manager.get_completed_tasks()
+        if not completed_tasks:
+            messagebox.showinfo("Completed Tasks", "No completed tasks.")
+            return
+
+        popup = tk.Toplevel(self)
+        popup.title("Completed Tasks")
+        popup.geometry("400x300")
+
+        task_listbox = tk.Listbox(popup, height=15)
+        task_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar = ttk.Scrollbar(popup, command=task_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        task_listbox.config(yscrollcommand=scrollbar.set)
+
+        for idx, task in enumerate(completed_tasks):
+            task_listbox.insert(tk.END, f"{idx + 1}. {task.title} (Completed)")
+
+        ttk.Button(popup, text="Close", command=popup.destroy).pack(pady=10)
 
     def exit_app(self):
         """Exit the application."""

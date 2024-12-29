@@ -1,5 +1,6 @@
 {
-    "tasks": [
+    "tasks": [],
+    "completed_tasks": [
         {
             "title": "New",
             "description": "New task desc",
@@ -8,8 +9,7 @@
             "days": 16,
             "deadline": "2024-12-31",
             "priority": 3.125,
-            "completed": false
+            "completed": true
         }
-    ],
-    "completed_tasks": []
+    ]
 }
