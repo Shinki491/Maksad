@@ -41,7 +41,7 @@ class TaskManagerApp(tk.Tk):
         """Refresh the task listbox."""
         self.task_listbox.delete(0, tk.END)
         for idx, task in enumerate(self.task_manager.get_tasks()):
-            self.task_listbox.insert(tk.END, f"{idx + 1}. {task.title} (Priority: {task.priority})")
+            self.task_listbox.insert(tk.END, f"{idx + 1}. {task.title}")
 
     def add_task_popup(self):
         """Open a popup window to add a new task."""
@@ -127,7 +127,7 @@ class TaskManagerApp(tk.Tk):
 
         tk.Label(popup, text="Priority (High/Medium/Low):").pack(pady=5)
         priority_entry = ttk.Entry(popup, width=30)
-        priority_entry.insert(0, task.priority)
+        priority_entry.insert(0, task.priority_type)
         priority_entry.pack()
 
         tk.Label(popup, text="Difficulty (1-5):").pack(pady=5)
