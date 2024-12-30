@@ -13,7 +13,7 @@ class TaskManager:
             pr_num = 50
         elif priority_type == "Low":
             pr_num = 10
-        priority = (pr_num * int(difficulty))/ days 
+        priority = (pr_num * int(difficulty))/ (days + 1) 
         new_task = Task(title, description, priority_type, difficulty, days, deadline, priority)
         self.tasks.append(new_task)
 
