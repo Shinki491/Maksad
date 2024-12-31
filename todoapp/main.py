@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
 
 # In case you wanna try out the CLI version, uncomment the CLI import and comment the gui import and main() 
+
 # def main():
 #     storage = Storage("data/db/tasks.json")  
 #     task_manager = TaskManager(storage)
