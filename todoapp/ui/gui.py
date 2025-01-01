@@ -26,6 +26,9 @@ class TaskManagerApp(tk.Tk):
         self.button_frame = ttk.Frame(self.task_list_frame)
         self.button_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
+        self.calendar_nav_frame = ttk.Frame(self.calendar_frame)
+        self.calendar_nav_frame.pack(side=tk.TOP, fill=tk.X)
+
         # Task List
         self.task_listbox = tk.Listbox(self.task_list_frame, height=15)
         self.task_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -40,46 +43,60 @@ class TaskManagerApp(tk.Tk):
         ttk.Button(self.button_frame, text="View Completed", command=self.view_completed).pack(side=tk.LEFT, padx=5, pady=5)
         ttk.Button(self.button_frame, text="Exit", command=self.exit_app).pack(side=tk.RIGHT, padx=5, pady=5)
 
-        # Load tasks and initialize calendar
+        # Initialize calendar
+        self.current_year = date.today().year
+        self.current_month = date.today().month
+        self.calendar_canvas = Canvas(self.calendar_frame)
+        self.calendar_canvas.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Button(self.calendar_nav_frame, text="Previous", command=self.prev_month).pack(side=tk.LEFT, padx=5, pady=5)
+        ttk.Button(self.calendar_nav_frame, text="Next", command=self.next_month).pack(side=tk.RIGHT, padx=5, pady=5)
+
+        # Load tasks and initialize view
         self.refresh_task_list()
         self.create_calendar_view()
 
     def create_calendar_view(self):
-        """Create the calendar view in the right frame."""
-        today = date.today()
-        self.calendar_canvas = Canvas(self.calendar_frame)
-        self.calendar_canvas.pack(fill=tk.BOTH, expand=True)
+        """Create or update the calendar view."""
+        self.calendar_canvas.delete("all")  # Clear the canvas
 
+        # Generate calendar for the current month
         cal = calendar.TextCalendar()
-        calendar_data = cal.formatmonth(today.year, today.month)
-
-        # Draw calendar
+        calendar_data = cal.formatmonth(self.current_year, self.current_month)
         self.calendar_canvas.create_text(
             10, 10, anchor="nw", text=calendar_data, font=("Courier", 10), fill="black"
         )
 
-        # Highlight dates with tasks
+        # Highlight task deadlines
         tasks = self.task_manager.get_tasks()
         for task in tasks:
-            if isinstance(task.deadline, str):
-                task_deadline = datetime.strptime(task.deadline, "%Y-%m-%d").date()
-            else:
-                task_deadline = task.deadline
-
-            if task_deadline.month == today.month:
-                day = task_deadline.day
-                self.highlight_date(day, task.title)
+            task_deadline = datetime.strptime(task.deadline, "%Y-%m-%d").date() if isinstance(task.deadline, str) else task.deadline
+            if task_deadline.year == self.current_year and task_deadline.month == self.current_month:
+                self.highlight_date(task_deadline.day, task.title)
 
     def highlight_date(self, day, task_title):
-        """Highlight the specified day on the calendar and display the task title."""
-        day_str = f"{day:2}"  # Ensure day has a leading space if it's a single digit
-        items = self.calendar_canvas.find_withtag("highlight")
-        for item in items:
-            if self.calendar_canvas.itemcget(item, "text") == day_str:
-                self.calendar_canvas.itemconfig(item, fill="red")
-                self.calendar_canvas.create_text(
-                    10, 20 * (day + 1), anchor="nw", text=task_title, font=("Courier", 8), fill="blue"
-                )
+        """Highlight a specific day on the calendar."""
+        self.calendar_canvas.create_text(
+            10, 100 + (day * 20), anchor="nw", text=f"{day:2} - {task_title}", font=("Courier", 8), fill="blue"
+        )
+
+    def prev_month(self):
+        """Navigate to the previous month."""
+        if self.current_month == 1:
+            self.current_month = 12
+            self.current_year -= 1
+        else:
+            self.current_month -= 1
+        self.create_calendar_view()
+
+    def next_month(self):
+        """Navigate to the next month."""
+        if self.current_month == 12:
+            self.current_month = 1
+            self.current_year += 1
+        else:
+            self.current_month += 1
+        self.create_calendar_view()
 
     def refresh_task_list(self):
         """Refresh the task listbox and update the calendar."""
