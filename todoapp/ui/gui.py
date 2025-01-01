@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
+import calendar
+from tkinter import Canvas
+from datetime import date
 
 def run_gui(task_manager):
     app = TaskManagerApp(task_manager)
@@ -11,13 +14,16 @@ class TaskManagerApp(tk.Tk):
         super().__init__()
         self.task_manager = task_manager
         self.title("To-Do List App")
-        self.geometry("600x400")
+        self.geometry("800x400")
 
         # Frames
         self.task_list_frame = ttk.Frame(self)
-        self.task_list_frame.pack(fill=tk.BOTH, expand=True)
+        self.task_list_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        self.button_frame = ttk.Frame(self)
+        self.calendar_frame = ttk.Frame(self)
+        self.calendar_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+        self.button_frame = ttk.Frame(self.task_list_frame)
         self.button_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         # Task List
@@ -34,14 +40,53 @@ class TaskManagerApp(tk.Tk):
         ttk.Button(self.button_frame, text="View Completed", command=self.view_completed).pack(side=tk.LEFT, padx=5, pady=5)
         ttk.Button(self.button_frame, text="Exit", command=self.exit_app).pack(side=tk.RIGHT, padx=5, pady=5)
 
-        # Load tasks
+        # Load tasks and initialize calendar
         self.refresh_task_list()
+        self.create_calendar_view()
+
+    def create_calendar_view(self):
+        """Create the calendar view in the right frame."""
+        today = date.today()
+        self.calendar_canvas = Canvas(self.calendar_frame)
+        self.calendar_canvas.pack(fill=tk.BOTH, expand=True)
+
+        cal = calendar.TextCalendar()
+        calendar_data = cal.formatmonth(today.year, today.month)
+
+        # Draw calendar
+        self.calendar_canvas.create_text(
+            10, 10, anchor="nw", text=calendar_data, font=("Courier", 10), fill="black"
+        )
+
+        # Highlight dates with tasks
+        tasks = self.task_manager.get_tasks()
+        for task in tasks:
+            if isinstance(task.deadline, str):
+                task_deadline = datetime.strptime(task.deadline, "%Y-%m-%d").date()
+            else:
+                task_deadline = task.deadline
+
+            if task_deadline.month == today.month:
+                day = task_deadline.day
+                self.highlight_date(day, task.title)
+
+    def highlight_date(self, day, task_title):
+        """Highlight the specified day on the calendar and display the task title."""
+        day_str = f"{day:2}"  # Ensure day has a leading space if it's a single digit
+        items = self.calendar_canvas.find_withtag("highlight")
+        for item in items:
+            if self.calendar_canvas.itemcget(item, "text") == day_str:
+                self.calendar_canvas.itemconfig(item, fill="red")
+                self.calendar_canvas.create_text(
+                    10, 20 * (day + 1), anchor="nw", text=task_title, font=("Courier", 8), fill="blue"
+                )
 
     def refresh_task_list(self):
-        """Refresh the task listbox."""
+        """Refresh the task listbox and update the calendar."""
         self.task_listbox.delete(0, tk.END)
         for idx, task in enumerate(self.task_manager.get_tasks()):
-            self.task_listbox.insert(tk.END, f"{idx + 1}. {task.title}")
+            self.task_listbox.insert(tk.END, f"{idx + 1}. {task.title} (Priority: {task.priority})")
+        self.create_calendar_view()
 
     def add_task_popup(self):
         """Open a popup window to add a new task."""
